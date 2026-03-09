@@ -1,0 +1,185 @@
+{
+  "name": "💌 AI-Powered Gmail Auto-Responder",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write a professional reply to the following email.\n\nEmail Subject:\n{{$node[\"Get a message\"].json[\"subject\"] || \"No Subject\"}}\n\nEmail Content:\n{{$node[\"Get a message\"].json[\"textPlain\"]}}\n\nInstructions:\n- Reply politely and professionally\n- Keep the response short and clear\n- Answer the question from the email if possible\n- Do not include a subject line\n- Only return the email reply text",
+        "options": {
+          "systemMessage": "You are an AI Email Assistant.\n\nYour job is to write professional and helpful email replies.\n\nRules:\n- Always be polite and professional\n- Keep replies short and clear\n- Answer the user's question based on their email\n- Do not invent information\n- Write like a human customer support agent\n\nReturn only the email reply text, not explanations."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -64,
+        -48
+      ],
+      "id": "63bf5f33-a414-42d9-b86c-62b326369c0a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -64,
+        144
+      ],
+      "id": "8a753f7d-002a-4841-b0b7-073df88d9d36",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "R8MLEgZMkOvT8D5R",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "qualityassurance502@gmail.com",
+        "subject": "={{\"Re: \" + ($node[\"Get a message\"].json[\"subject\"] || \"No Subject\")}}",
+        "message": "={{$json[\"output\"]}}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        240,
+        -48
+      ],
+      "id": "78fb4270-0ca4-450b-b440-22267763d7ba",
+      "name": "Send a message",
+      "webhookId": "58640f6a-4025-4e7c-bfd3-19f3196025e3",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "IFrGgl3vubXpnnEm",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "includeSpamTrash": false,
+          "labelIds": [
+            "INBOX"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -528,
+        -48
+      ],
+      "id": "2bc9829d-c8e1-494b-bcc4-789286b0a34a",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "IFrGgl3vubXpnnEm",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "messageId": "={{ $json.id }}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -320,
+        -48
+      ],
+      "id": "42cde9cb-cf6d-4341-a14c-d79cf694ceed",
+      "name": "Get a message",
+      "webhookId": "0d046fbd-d68b-4ab8-972c-58484a5b125e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "IFrGgl3vubXpnnEm",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a message": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "bbad82cc-018f-4181-908d-5157085ffb76",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7fb9c15a60f56efb2ed4242be9731d3ca6085debc8b55380dea54cf9f42b047d"
+  },
+  "id": "9HuW5hQIaZCh21tX",
+  "tags": []
+}
